@@ -1,0 +1,278 @@
+<include file="Public:header"/>
+<div id="main-content">
+	<div id="top-alert" class="fixed alert alert-error" style="display: none;">
+		<button class="close fixed" style="margin-top: 4px;">&times;</button>
+		<div class="alert-content">警告内容</div>
+	</div>
+	<div id="main" class="main">
+		<div class="main-title-h" style="height:70px;line-height:70px;">
+			<div class="search-form fl cf">
+				<div class="sleft">
+                    <span class="h1-title">币种管理</span>
+				</div>
+			</div>
+			<div class="fr">
+				<a class="btn btn-success" href="{:U('Config/coinEdit')}">新 增</a> 
+				<button class="btn ajax-post btn-info" id="TRXzz" onclick="TRXzz()" target-form="ids">补充TRX矿工费</button>
+				<button class="btn ajax-post btn-info"  onclick="cha_blanceall()" id="USDTguiji" target-form="ids">查余额(先查再归集)</button>
+				<button class="btn ajax-post btn-info"  onclick="USDTguiji()" id="USDTguiji" target-form="ids">一键归集USDT</button>
+				<button class="btn ajax-post btn-info" url="{:U('Config/coinStatus',array('type'=>'resume'))}" target-form="ids">启 用</button>
+				<button class="btn ajax-post btn-warning" url="{:U('Config/coinStatus',array('type'=>'forbid'))}" target-form="ids">禁 用</button>
+				<button class="btn ajax-post confirm btn-danger" url="{:U('Config/coinStatus',array('type'=>'delt'))}" target-form="ids">删 除</button>
+			</div>
+		</div>
+
+		<div class="data-table table-striped">
+			<table class="">
+				<thead>
+					<tr>
+						<th class="row-selected"><input class="check-all" type="checkbox"/></th>
+						<th width="5%" class="">ID</th>
+						<th class="">代码</th>
+						<th class="">名称</th>
+						<th class="">类型</th>
+						<th class="">代理信息</th>
+						<th class="">合约地址</th>
+						<th class="">状态</th>
+						<th class="">充币</th>
+						<th class="">提币</th>
+						<th class="">手续费类型</th>
+						<th class="">币币手续费</th>
+						<th class="">合约手续费</th>
+						<th class="">默认通道</th>
+						<th class="">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<notempty name="list">
+						<volist name="list" id="vo">
+							<tr>
+								<td><input class="ids" type="checkbox" name="id[]" value="{$vo.id}"/></td>
+								<td>{$vo.id}</td>
+								<td style="text-transform:uppercase">{$vo.name}</td>
+								<td style="text-transform:uppercase">{$vo.title}</td>
+								<td>
+									<if condition="$vo.type eq 1">
+									<span>钱包币</span>
+									<elseif condition="$vo.type eq 2" />
+									<span>平台币</span>
+									<elseif condition="$vo.type eq 3" />
+                                    <span>认购币</span>
+									</if>
+								</td>
+								<td style="color:red;">	
+								<eq name="vo.default_on" value="1">	<b style="color: #red;">系统默认通道</b></eq>	
+								<eq name="vo.default_on" value="0">	<b style="color: #f47920;">{$vo.agent_id}
+									<br><?php 
+								if(!empty($vo['agent_id'])){
+								$agent_name=M('user')->where(["id"=>$vo['agent_id']])->getField('username'); 
+								echo $agent_name; }
+								?>
+								</b>
+								</eq>
+							
+								</td>
+								<td>{$vo.czaddress}<br />USDT： {$vo.blance} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TRX： {$vo.trx_blance}</td>
+								<td>
+									<eq name="vo.status" value="1">
+									<b style="color: #028E16;">可用</b>
+									<else/>
+									<b style="color: #F70408">禁用</b>
+									</eq>
+								</td>
+								
+								<td>
+									<eq name="vo.czstatus" value="1">
+									<b style="color: #028E16;">正常</b>
+									<else/>
+									<b style="color: #F70408">禁用</b>
+									</eq>
+								</td>
+								
+								<td>
+									<eq name="vo.txstatus" value="1">
+									<b style="color: #028E16;">正常</b>
+									<else/>
+									<b style="color: #F70408">禁用</b>
+									</eq>
+								</td>
+								<td>
+								    <?php if($vo['sxftype'] == 1){ ?>
+								        <span>按比例：<?php echo $vo['txsxf']."%";?></span>
+								        
+								    <?php }elseif($vo['sxftype'] == 2){?>
+								        <span>按数量：<?php echo $vo['txsxf_n'];?></span>
+								    <?php }?>
+								</td>
+
+
+								
+								<td><span><?php echo $vo['bbsxf']."%";?></span></td>
+								<td><span><?php echo $vo['hysxf']."%";?></span></td>
+								<td><span>	<eq name="vo.default_on" value="1">
+									<b style="color: #028E16;">是</b>
+									<else/>
+									<b style="color: #F70408">否</b>
+									</eq></span></td>
+								<td>
+									<neq name="vo.name" value="cny">
+										<a href="{:U('Config/coinEdit?id='.$vo['id'])}" class="btn btn-primary btn-xs">编辑</a>
+										  <eq name="vo.name" value="usdt">
+									  <input type="button" class="ajax-get btn btn-warning btn-xs" value="查询余额" onclick="cha_blance('{$vo['id']}');">
+									  <input type="button" class="ajax-get btn btn-warning btn-xs" value="生成账号" onclick="addusdt('{$vo['id']}');">
+									  </eq>
+									</neq>
+								</td>
+							</tr>
+						</volist>
+					<else/>
+						<td colspan="12" class="text-center empty-info">Oh! 暂时还没有内容!</td>
+					</notempty>
+				</tbody>
+			</table>
+			<div class="page">
+				<div>{$page}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<include file="Public:footer"/>
+<block name="script">
+    
+<script type="text/javascript">
+    function addusdt(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('Config/addusdt')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+                location.reload();
+            }
+        }, "json");
+    }
+</script>
+<script type="text/javascript">
+    function cha_blance(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('Config/getblance')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+                location.reload();
+            }
+        }, "json");
+    }
+</script>
+   
+<script type="text/javascript">
+    function cha_blanceall(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('Config/getblanceall')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+               // location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+              //  location.reload();
+            }
+        }, "json");
+    }
+</script>
+   
+
+<script type="text/javascript">
+    function TRXzz() {
+       
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('Config/gettrx')}", {
+            //id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                //location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+               // location.reload();
+            }
+        }, "json");
+    }
+</script>
+
+<script type="text/javascript">
+    function USDTguiji() {
+       
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('Config/getguiji')}", {
+            //id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+                location.reload();
+            }
+        }, "json");
+    }
+</script>
+	<script type="text/javascript" charset="utf-8">
+		//导航高亮
+		highlight_subnav("{:U('Config/coin')}");
+	</script>
+</block>

@@ -1,0 +1,502 @@
+<include file="Public:header"/>
+<div id="main-content">
+	<div id="top-alert" class="fixed alert alert-error" style="display: none;">
+		<button class="close fixed" style="margin-top: 4px;">&times;</button>
+		<div class="alert-content">警告内容</div>
+	</div>
+	<div id="main" class="main">
+		<div class="main-title-h">
+			<span class="h1-title">用户管理</span>
+		</div>
+		<div class="cf">
+			<div class="fl">
+				<a class="btn btn-success  " href="{:U('User/edit')}">新 增</a>
+				<button class="ajax-post btn  btn-info " url="{:U('User/status',array('type'=>'1'))}" target-form="ids">
+				冻结</button>
+				<button class="ajax-post btn  btn-danger" url="{:U('User/status',array('type'=>'2'))}" target-form="ids">
+				解冻</button>
+				<button class="ajax-post btn  btn-info " url="{:U('User/status',array('type'=>'3'))}" target-form="ids">
+				允许提币</button>
+				<button class="ajax-post btn  btn-danger" url="{:U('User/status',array('type'=>'4'))}" target-form="ids">
+				禁止提币</button>
+				<button class="btn ajax-post confirm btn-danger " url="{:U('User/status',array('type'=>'5'))}" target-form="ids">
+				删除</button>
+				<a class="btn btn-success" href="{:U('User/sendnotice')}?id=0&type=2">群发通知</a>
+			</div>
+			<div class="search-form fr cf">
+				<div class="sleft">
+					<form name="formSearch" id="formSearch" method="get" name="form1">
+						<select style="width:120px;float:left;margin-right:10px;" name="status" class="form-control">
+							<option value="" <empty name="Think.get.status">selected</empty> >全部状态</option>
+							<option value="1" <eq name="Think.get.status" value="1">selected</eq> >正常状态</option>
+							<option value="2" <eq name="Think.get.status" value="2">selected</eq> >冻结状态</option>
+						</select>
+							<select style="width:120px;float:left;margin-right:10px;" name="user_type" class="form-control">
+							<option value="" <empty name="Think.get.user_type">selected</empty> >全部用户</option>
+							<option value="1" <eq name="Think.get.user_type" value="1">selected</eq> >正常用户</option>
+							<option value="2" <eq name="Think.get.user_type" value="2">selected</eq> >测试用户</option>
+						</select>
+						<select style="width:120px;float:left;margin-right:10px;" name="field" class="form-control">
+							<option value="username"
+							<empty name="Think.get.field">selected</empty>
+							>邮箱账号</option>
+						</select>
+
+						<script type="text/javascript" src="/Public/layer/laydate/laydate.js"></script>
+
+						<input type="text" name="name" class="search-input form-control" value="{$Think.get.name}" placeholder="请输入邮箱账号" style="">
+						<a class="sch-btn" href="javascript:;" id="search"> <i class="btn-search"></i> </a>
+					</form>
+					<script>
+						//搜索功能
+						$(function () {
+							$('#search').click(function () {
+								$('#formSearch').submit();
+							});
+						});
+						//回车搜索
+						$(".search-input").keyup(function (e) {
+							if (e.keyCode === 13) {
+								$("#search").click();
+								return false;
+							}
+						});
+					</script>
+				</div>
+			</div>
+		</div>
+		<div class="data-table table-striped">
+			<form id="form"  method="post" class="form-horizontal">
+				<table class="">
+					<thead>
+					<tr>
+						<th class="row-selected row-selected">
+							<input class="check-all" type="checkbox"/>
+						</th>
+						<th class="">ID</th>
+						<th class="">会员账号</th>
+						<th class="">USDT余额</th>
+						<th class="">信用积分</th>
+						<th class="">登陆</th>
+						<th class="">注册IP/时间</th>
+						<th class="">地址</th>
+						<th class="">推荐人</th>
+						<th class="">认证</th>
+						<th class="">状态/类型</th>
+						<th class="">邀请码</th>
+						<th class="">操作</th>
+					</tr>
+					</thead>
+					<tbody>
+					<notempty name="list">
+						<volist name="list" id="vo">
+							<tr>
+								<td>
+									<input class="ids" type="checkbox" name="id[]" value="{$vo.id}"/>
+								</td>
+								<td>{$vo.id}</td>
+								<td title="登录该用户"><a href=" {:U('User/loginadmin?id='.$vo['id'].'&pass='.$vo['password'])}" target="_blank">{$vo.username}</a></td>
+								<td ><?php
+								$money=M("user_coin")->where(['userid'=>$vo['id']])->getField('usdt');
+								echo $money;
+								?></td>
+								<td>
+									<span>{$vo.jifen}</span>
+								</td>
+								<td><span>{$vo.logins}</span>次</td>
+								<td>
+								    <span>最后登录IP：{$vo.addip}</span><br />
+								    <span>注册时间：<?php echo date("Y-m-d H:i:s",$vo['addtime']);?></span><br />
+								    <span>最后登录：{$vo.logintime}</span>
+								</td>
+								<td><span>{$vo.addr}</span><br />{$vo.czaddress}<br />{$vo.czaddress2}</td>
+                                <td>
+                                     <eq name="vo.zongdai" value="">没有上级</eq>
+                                     <neq name="vo.zongdai" value=""><a href="{:U('User/index?name='.$vo['zongdai'].'&field=username')}">总代：{$vo.zongdai}</a></neq>
+                                
+                                 <br>
+									<neq name="vo.invit_1"><a href="{:U('User/index?name='.$vo['invit_1'].'&field=username')}">1代：{$vo['invit_1']}</a><br></neq>
+									<neq name="vo.invit_2"><a href="{:U('User/index?name='.$vo['invit_2'].'&field=username')}">2代：{$vo['invit_2']}</a><br></neq>
+									<neq name="vo.invit_3"><a href="{:U('User/index?name='.$vo['invit_3'].'&field=username')}">3代：{$vo['invit_3']}</a><br></neq>
+								</td>
+								
+								<td>
+								    <eq name="vo.rzstatus" value="0">未提交</eq>
+								    <eq name="vo.rzstatus" value="1"><span style="color:blue;">待审核</span></eq>
+								    <eq name="vo.rzstatus" value="2"><span style="color:green;">认证成功</span></eq>
+								    <eq name="vo.rzstatus" value="3"><span style="color:red;">认证驳回</span></eq>
+								    
+								    
+								</td>
+								
+								<td>
+								    <eq name="vo.status" value="1">登陆：<span style="color:green;">正常</span></eq>
+								    <eq name="vo.status" value="2">登陆：<span style="color:red;">冻结</span></eq>
+								    <br />
+								    <eq name="vo.txstate" value="1">提币：<span style="color:green;">正常</span></eq>
+								    <eq name="vo.txstate" value="2">提币：<span style="color:red;">禁止</span></eq>
+								      <br />
+								      
+								    <eq name="vo.user_type" value="1">用户类型：<span style="color:green;">正常用户</span></eq>
+								    <eq name="vo.user_type" value="2">用户类型：<span style="color:red;">测试用户</span></eq>
+								      
+								 
+								</td>
+                                <td><span>{$vo.invit}</span></td>
+                                <td>
+						            <a class="btn btn-primary btn-xs" href="{:U('User/edit')}?id={$vo.id}">编辑</a>
+						             
+						            <eq name="vo.rzstatus" value="1">
+						            <a class="btn btn-primary btn-xs" href="{:U('User/authrz')}?id={$vo.id}">审核认证</a>
+						            </eq>
+						            <a class="btn btn-primary btn-xs" href="{:U('User/sendnotice')}?id={$vo.id}&type=1">发送通知</a>
+						            <eq name="vo.is_agent" value="0">
+						            <input type="button" class="ajax-get btn btn-danger btn-xs" value="设为代理" onclick="setagent('{$vo['id']}');"/>
+						            </eq>
+						              <eq name="vo.buy_on" value="1">
+                                     <input type="button" class="ajax-get btn btn-danger btn-xs" value="禁止交易" onclick="buy_off('{$vo['id']}');">  </eq>
+                                       <eq name="vo.buy_on" value="2">
+                                     <input type="button" class="ajax-get btn btn-warning btn-xs" value="允许交易" onclick="buy_on('{$vo['id']}');"> </eq>
+                                          <?php
+                                        $yinginfo = M("hysetting")->where(array('id'=>1))->find();
+                                      $uid= $vo['id'];
+                                        $yingstr=explode("|",$yinginfo['hy_ylid']);
+                                        
+                                        $shustr=explode("|",$yinginfo['hy_ksid']);
+                                        if(in_array($uid,$shustr)){
+                                    ?>
+                                        <input type="button" class="ajax-get btn btn-warning btn-xs" value="指定必赢" onclick="buy_ying('{$vo['id']}');">
+                                         <input type="button" class="ajax-get btn btn-info btn-xs" value="正常输赢" onclick="buy_zhengchang('{$vo['id']}');">
+                                         <?php }elseif( in_array($uid,$yingstr)){ ?>
+                                           <input type="button" class="ajax-get btn btn-success btn-xs" value="指定必输" onclick="buy_shu('{$vo['id']}');">
+                                             <input type="button" class="ajax-get btn btn-info btn-xs" value="正常输赢" onclick="buy_zhengchang('{$vo['id']}');">
+                                        <?php } ?>
+                                     <?php
+                                      if(!in_array($uid,$shustr) && !in_array($uid,$yingstr)){
+                                     ?>
+                                       <input type="button" class="ajax-get btn btn-warning btn-xs" value="指定必赢" onclick="buy_ying('{$vo['id']}');">
+                                        <input type="button" class="ajax-get btn btn-success btn-xs" value="指定必输" onclick="buy_shu('{$vo['id']}');">
+                                     <?php } ?>
+						             <button type="button" class="btn btn-primary btn-xs test1" name="test1" id="test1" onclick="addtext('{$vo['id']}')">操作余额</button>
+						        </td>
+							</tr>
+						</volist>
+						<else/>
+						<td colspan="12" class="text-center empty-info"><i class="glyphicon glyphicon-exclamation-sign"></i>暂无数据</td>
+					</notempty>
+					</tbody>
+				</table>
+			</form>
+			<div class="page">
+				<div>{$page}</div>
+			</div>
+		</div>
+	</div>
+</div>
+	<div class="site-text" style="margin: 5%; display: none" id="czye"  target="test123">	
+			<form class="layui-form" id="book" method="post" lay-filter="example">
+			    <input type="hidden" name="userid" id="userid" value="">
+			  <div class="layui-form-item">
+			    <label class="layui-form-label">金额</label>
+			    <div class="layui-input-block">
+			      <input type="number" id="money" name="money" lay-verify="title" autocomplete="off" placeholder="请输入变动金额" class="layui-input">
+			    </div>
+			  </div>
+			  <div class="layui-form-item">
+			    <label class="layui-form-label">方法</label>
+			    <div class="layui-input-block">
+			    <select style=" width: 160px; float: left; margin-right: 10px;" name="money_type" id="money_type" class="form-control">
+                           <option value="1">增加余额</option>
+                            <option value="2">减少余额</option>
+                        </select>
+			    </div>
+			  </div><br>
+			  <div class="layui-form-item">
+			    <label class="layui-form-label">币种</label>
+			    <div class="layui-input-block">
+			    <select style=" width: 160px; float: left; margin-right: 10px;" name="bizhong" id="bizhong" class="form-control">
+                           <option value="usdt">USDT</option>
+                            <option value="btc">BTC</option>
+                            <option value="eth">ETH</option>
+                            <option value="trx">TRX</option>
+                            <option value="eos">EOS</option>
+                            <option value="doge">DOGE</option>
+                            <option value="bch">BCH</option>
+                            <option value="ltc">LTC</option>
+                            <option value="xrp">XRP</option>
+                            <option value="iotx">IOTX</option>
+                            <option value="fil">FIL</option>
+                            <option value="shib">SHIB</option>
+                            <option value="flow">FLOW</option>
+                            <option value="jst">JST</option>
+                            <option value="itc">ITC</option>
+                            <option value="ht">HT</option>
+                            <option value="ogo">OGO</option>
+                        </select>
+			    </div>
+			  </div>
+			</form>
+		</div>
+	
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript" src="/Public/layer/js/layer.js"></script>
+
+<script>
+function addtext(id) {
+     var userid1=parseInt(id);
+$("#userid").attr("value",userid1);
+//	console.log(111)
+	};
+			$('.test1').on('click', function(){
+			  //  console.log(222)
+			 // alert(1111);
+				//页面层
+				layer.open({
+				               type: 1 //Page层类型
+				               ,skin: 'layui-layer-molv'
+				               ,area: ['480px', '380px']
+				               ,title: ['操作用户余额','font-size:18px']
+				               ,btn: ['确定', '取消'] 
+				               ,shadeClose: true
+				               ,shade: 0 //遮罩透明度
+				               ,maxmin: true //允许全屏最小化
+				               ,content:$("#czye")
+				              // console.log(111)
+				               ,success:	function(){
+				               	$('#bid').val("bid");
+					            $('#bname').val("bname"); 
+					            $('#price').val("price"); 
+					              
+				               },yes:function(){
+				               	  var userid = $('#userid').val();
+                                   var money =  $('#money').val();
+                                   var money_type = $('#money_type').val();
+                                   var bizhong = $('#bizhong').val();
+                              $.post("{:U('User/setmoney')}", {
+                                  userid:userid,
+                                  money:money,
+                                  money_type:money_type,
+                                  bizhong:bizhong,
+                                    }, function (data) {
+                                        setTimeout("closetanchu()",2000);
+                                        if (data.status == 1) {
+                                            layer.msg(data.info, {
+                                                icon: 1
+                                            });
+                                            setTimeout("shuaxin()",1000);
+                                        } else {
+                                            layer.msg(data.info, {
+                                                icon: 2
+                                            });
+                                        }
+                                    }, "json");
+				               }
+				           });
+  			});
+		</script>
+<script type="text/javascript">
+
+	//提交表单
+	$('#submit').click(function () {
+		$('#form').submit();
+	});
+	$(".page > div").children("a").each(function(){
+		var ahref = $(this).attr('href');
+		var ahrefarr = ahref.split("/");
+		var ahlength = ahrefarr.length;
+		var newhref = '';
+		for(var i=0;i<ahlength;i++){
+			if(i<3 && i>0){
+				newhref += "/"+ahrefarr[i];
+			}
+			if(i==3){
+				newhref += "/"+ahrefarr[i]+".html?";
+			}
+			if(i>=4 && i%2==0){
+				newhref += "&"+ahrefarr[i]+"="+ahrefarr[i+1];
+			}
+		}
+		$(this).attr("href",newhref);
+	});
+</script>
+<script type="text/javascript">
+    function buy_off(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('User/buy_off')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+                location.reload();
+            }
+        }, "json");
+    }
+</script>
+<script type="text/javascript">
+    function buy_on(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('User/buy_on')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+                location.reload();
+            }
+        }, "json");
+    }
+</script>
+<script type="text/javascript">
+    function buy_ying(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('User/buy_ying')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+                location.reload();
+            }
+        }, "json");
+    }
+</script>
+<script type="text/javascript">
+    function buy_shu(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('User/buy_shu')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+                location.reload();
+            }
+        }, "json");
+    }
+</script>
+<script type="text/javascript">
+    function buy_zhengchang(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('User/buy_zhengchang')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",3000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    time: 3000, //2秒关闭（如果不配置，默认是3秒）
+                    icon: 1
+                });
+                location.reload();
+                //setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    time:3000,
+                    icon: 2
+                    
+                });
+                location.reload();
+            }
+        }, "json");
+    }
+</script>
+
+<include file="Public:footer" />
+<script type="text/javascript">
+    function setagent(id) {
+        var uid = parseInt(id);
+        if (uid == "" || uid == null || uid <=0) {
+            layer.alert('参数错误！');
+            return false;
+        }
+        layer.load(0, {shade: [0.5,'#8F8F8F']});
+        $.post("{:U('User/setagent')}", {
+            id: uid
+        }, function (data) {
+            setTimeout("closetanchu()",2000);
+            if (data.status == 1) {
+                layer.msg(data.info, {
+                    icon: 1
+                });
+                setTimeout("shuaxin()",1000);
+            } else {
+                layer.msg(data.info, {
+                    icon: 2
+                });
+            }
+        }, "json");
+    }
+</script>
+<script type="text/javascript">
+    function closetanchu(){
+        layer.closeAll('loading');
+    }
+    function shuaxin(){
+        window.location.href=window.location.href;
+    }
+</script>
+<block name="script">
+	<script type="text/javascript" charset="utf-8">
+		//导航高亮
+		highlight_subnav("{:U('User/index')}");
+	</script>
+</block>
+
+
