@@ -9,6 +9,7 @@ class AjaxtradeController extends MobileController
         if($symbol == '' || $symbol == null){
             $this->ajaxReturn(['code'=>0]);
         }
+        // exit("1");
         if($symbol == "MBN/USDT"){
             $symbol = "mbn_usdt";
             $mlist = M("market")->where(array('name'=>$symbol))->field("new_price,min_price,max_price,faxingjia,volume")->find();
@@ -43,6 +44,7 @@ class AjaxtradeController extends MobileController
             $url = "https://api.huobi.pro/market/history/kline?period=1day&size=1&symbol=".$coinname;
             $result = $this->get_maket_api($url);
             $pdata = $result['data'][0];
+            var_dump($url);
             
             $open = $pdata['open'];//开盘价
             $close = $pdata['close'];//现价
@@ -74,6 +76,8 @@ class AjaxtradeController extends MobileController
         if($symbol == '' || $symbol == null){
             $this->ajaxReturn(['code'=>0]);
         }
+
+        exit("1");
         
         if($symbol == "MBN/USDT"){
             $symbol = "mbn_usdt";

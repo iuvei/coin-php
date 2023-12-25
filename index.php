@@ -93,7 +93,6 @@ function wherecome()
 
 // 判断访问入口
 // if(wherecome()) {
-
 //     define('WHERECOME','Mobile');
 // } else {
 //     //define('WHERECOME','Mobile');

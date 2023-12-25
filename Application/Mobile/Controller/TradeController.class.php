@@ -1,7 +1,7 @@
 <?php
 /* 交易中心 */
 namespace Mobile\Controller;
-
+set_time_limit(300);
 class TradeController extends MobileController
 {
     

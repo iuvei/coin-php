@@ -1,5 +1,6 @@
 <?php
 namespace Mobile\Controller;
+set_time_limit(300);
 
 class UserController extends MobileController
 {
